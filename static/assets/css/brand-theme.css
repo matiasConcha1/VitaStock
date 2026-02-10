@@ -1,4 +1,4 @@
-/* Global pastel branding for VitaStock */
+/* Branding neutra para modos claro/oscuro */
 
 .sidenav {
   background: rgba(255, 255, 255, 0.94);
@@ -6,7 +6,8 @@
 }
 
 .navbar-brand-img {
-  max-height: 56px;
+  max-height: 90px;
+  max-width: 180px;
   width: auto;
 }
 
@@ -15,42 +16,219 @@
 }
 
 .btn-primary, .bg-gradient-primary {
-  background: linear-gradient(90deg, #f57dac 0%, #f39ac3 100%) !important;
+  background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%) !important;
   border: none;
 }
 
 a {
-  color: #d4558b;
+  color: #4f46e5;
 }
 a:hover {
-  color: #b53d73;
+  color: #4338ca;
 }
 
 /* Theme handling */
 .theme-light {
-  background: linear-gradient(135deg, #ffeef6 0%, #fff7fb 45%, #ffe3f0 100%);
+  background: #f7f8fb;
   color: #1f2933;
 }
 
 .theme-dark {
-  background: #0f1115;
+  background: #0b0d11;
+  color: #e7e9ed;
+}
+
+.theme-dark .main-content {
+  background: #0b0d11;
   color: #e7e9ed;
 }
 
 .theme-dark .card {
-  background: #161920;
+  background: #141821;
   color: #e7e9ed;
+  border-color: #1f2430;
+}
+
+.theme-dark .bg-white,
+.theme-dark .card.bg-white,
+.theme-dark .card .bg-white,
+.theme-dark .card .bg-light {
+  background: #141821 !important;
+  color: #e7e9ed !important;
+}
+
+.theme-dark .card .text-dark,
+.theme-dark .text-dark {
+  color: #e7e9ed !important;
+}
+
+.theme-dark .card .border,
+.theme-dark .border {
+  border-color: #1f2430 !important;
 }
 
 .theme-dark .navbar,
 .theme-dark .sidenav {
-  background: rgba(20, 22, 28, 0.9) !important;
+  background: #0f1219 !important;
   color: #e7e9ed;
 }
 
+/* Fondo general cuando hay barra lateral (clase del template) */
+.theme-dark.g-sidenav-show,
+.theme-dark .g-sidenav-show,
+.theme-dark body.g-sidenav-show {
+  background: #0b0d11 !important;
+}
+
+.theme-dark .main-content {
+  background: #0b0d11;
+}
+
+.theme-dark .sidenav .nav-link {
+  color: #e7e9ed !important;
+  background: transparent;
+}
+
+.theme-dark .sidenav .nav-link.active,
+.theme-dark .sidenav .nav-link:hover {
+  background: #1f2430 !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 0 0 1px #2d3546;
+}
+
+.theme-dark .sidenav h6 {
+  color: #9aa3b7 !important;
+}
+
+/* Dashboard icon en rojo (solo el ícono) */
+.sidenav .nav-dashboard .icon-shape {
+  background: #ffffff;
+  color: #e63946 !important;
+}
+
+.theme-dark .nav-dashboard .icon-shape {
+  background: #1f2430 !important;
+  color: #ff6b6b !important;
+}
+
+/* Estilo profesional para items activos del sidebar (claro y oscuro) */
+.sidenav .nav-link {
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.sidenav .nav-link .icon-shape {
+  transition: all 0.2s ease;
+}
+
+.sidenav .nav-link.active,
+.sidenav .nav-link:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.sidenav .nav-link.active .icon-shape,
+.sidenav .nav-link:hover .icon-shape {
+  background: linear-gradient(135deg, #ff7e35 0%, #ffb347 100%);
+  color: #fff;
+}
+
+.theme-dark .sidenav .nav-link.active .icon-shape,
+.theme-dark .sidenav .nav-link:hover .icon-shape {
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  color: #fff;
+}
+
+/* Dashboard: solo icono rojo, fondo mantiene blanco/oscuro */
+.sidenav .nav-dashboard .icon-shape {
+  background: #ffffff;
+  color: #e63946 !important;
+}
+
+.theme-dark .nav-dashboard .icon-shape {
+  background: #1f2430 !important;
+  color: #ff6b6b !important;
+}
+
+.sidenav .nav-dashboard.active .icon-shape,
+.sidenav .nav-dashboard:hover .icon-shape {
+  background: #ffffff !important;
+  color: #e63946 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.theme-dark .nav-dashboard.active .icon-shape,
+.theme-dark .nav-dashboard:hover .icon-shape {
+  background: #1f2430 !important;
+  color: #ff6b6b !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+}
+
+/* Asegurar que el svg siga el color */
+.sidenav .icon-shape svg,
+.sidenav .icon-shape svg path,
+.sidenav .icon-shape svg g {
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+.theme-dark .sidenav .nav-link.active,
+.theme-dark .sidenav .nav-link:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.theme-dark .breadcrumb a,
+.theme-dark .text-dark,
+.theme-dark .nav-link,
+.theme-dark label,
+.theme-dark h1, .theme-dark h2, .theme-dark h3, .theme-dark h4, .theme-dark h5, .theme-dark h6,
+.theme-dark p, .theme-dark span {
+  color: #e7e9ed !important;
+}
+
 .theme-dark a {
-  color: #f39ac3;
+  color: #8da2ff;
 }
 .theme-dark a:hover {
-  color: #f57dac;
+  color: #b4c3ff;
+}
+
+.theme-dark .table {
+  color: #e7e9ed;
+}
+.theme-dark .table thead th {
+  color: #cfd6e6;
+  border-color: #1f2430;
+}
+.theme-dark .table tbody tr td {
+  border-color: #1f2430;
+}
+
+.theme-dark .form-control,
+.theme-dark .input-group-text {
+  background: #1a1f2a;
+  color: #e7e9ed;
+  border-color: #2a3040;
+}
+
+.theme-dark ::placeholder {
+  color: #9aa3b7 !important;
+}
+
+.theme-dark .btn-outline-primary {
+  color: #8da2ff;
+  border-color: #8da2ff;
+}
+.theme-dark .btn-outline-primary:hover {
+  background: #8da2ff;
+  color: #0b0d11;
+}
+
+/* Inputs numéricos: ocultar spinners para que no contrasten en dark/light */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
 }

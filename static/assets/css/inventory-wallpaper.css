@@ -1,14 +1,14 @@
-/* VitaStock pastel wallpaper with theme support */
+/* Wallpaper neutro para ambos temas */
 
 body.theme-light {
-  background: linear-gradient(135deg, #ffeef6 0%, #fff7fb 45%, #ffe3f0 100%);
+  background: #f7f8fb;
   background-attachment: fixed;
 }
 
 body.theme-dark {
   background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.04), transparent 40%),
-              radial-gradient(circle at 70% 10%, rgba(255, 149, 188, 0.05), transparent 32%),
-              #0f1115;
+              radial-gradient(circle at 70% 10%, rgba(79, 70, 229, 0.07), transparent 32%),
+              #0b0d11;
 }
 
 .main-content {
@@ -24,7 +24,7 @@ body.theme-dark {
   font-size: 64px;
   font-weight: 700;
   letter-spacing: 2px;
-  color: rgba(255, 255, 255, 0.14);
+  color: rgba(0, 0, 0, 0.05);
   pointer-events: none;
   user-select: none;
   z-index: 0;

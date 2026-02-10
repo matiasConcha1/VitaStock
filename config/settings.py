@@ -62,6 +62,9 @@ INSTALLED_APPS = [
     # Charts
     "apps.charts",
 
+    # Inventory
+    "apps.inventory",
+
     # Tooling API-GEN
     'rest_framework',            # Include DRF           # <-- NEW 
     'rest_framework.authtoken',  # Include DRF Auth      # <-- NEW     

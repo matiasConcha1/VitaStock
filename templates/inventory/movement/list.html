@@ -1,6 +1,6 @@
 {% extends "inventory/base_inventory.html" %}
 
-{% block page_title %}Movements{% endblock page_title %}
+{% block page_title %}Movimientos{% endblock page_title %}
 
 {% block header_actions %}
 <a href="{% url 'inventory:movement_create' %}" class="btn btn-primary">Register movement</a>
@@ -34,7 +34,7 @@
               <td>{{ movement.note|default:"-" }}</td>
             </tr>
           {% empty %}
-            <tr><td colspan="7" class="text-center text-muted">No movements yet.</td></tr>
+            <tr><td colspan="7" class="text-center text-muted">Aún no hay movimientos.</td></tr>
           {% endfor %}
         </tbody>
       </table>

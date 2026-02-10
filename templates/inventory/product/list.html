@@ -1,0 +1,53 @@
+{% extends "inventory/base_inventory.html" %}
+
+{% block page_title %}Products{% endblock page_title %}
+
+{% block header_actions %}
+<a href="{% url 'inventory:product_create' %}" class="btn btn-primary">Create</a>
+{% endblock header_actions %}
+
+{% block inventory_content %}
+<div class="card">
+  <div class="card-body">
+    <form method="get" class="row g-2 mb-3">
+      <div class="col-sm-6 col-md-4">
+        <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search products...">
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-outline-primary" type="submit">Search</button>
+        <a href="{% url 'inventory:product_list' %}" class="btn btn-outline-secondary">Clear</a>
+      </div>
+    </form>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-items-center mb-0">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Unit</th>
+            <th>Min stock</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product in products %}
+            <tr>
+              <td>{{ product.name }}</td>
+              <td>{{ product.category }}</td>
+              <td>{{ product.get_unit_display }}</td>
+              <td>{{ product.min_stock }}</td>
+              <td class="text-end">
+                <a href="{% url 'inventory:product_update' product.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                <a href="{% url 'inventory:product_delete' product.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5" class="text-center text-muted">No products yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock inventory_content %}

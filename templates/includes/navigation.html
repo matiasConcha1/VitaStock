@@ -4,7 +4,7 @@
   <div class="container-fluid py-1 px-3">
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
-        <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a></li>
+        <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Páginas</a></li>
         <li class="breadcrumb-item text-sm text-dark active" aria-current="page">{{ segment|replace_value:"_" }}</li>
       </ol>
       <h6 class="font-weight-bolder mb-0">{{ segment|replace_value:"_" }}</h6>
@@ -13,11 +13,13 @@
       <div class="ms-md-auto pe-md-3 d-flex align-items-center gap-2">
         <div class="input-group">
           <span class="input-group-text text-body"><i class="fas fa-search" aria-hidden="true"></i></span>
-          <input type="text" class="form-control" placeholder="Type here...">
+          <input type="text" class="form-control" placeholder="Buscar...">
         </div>
-        <button class="btn btn-sm btn-outline-secondary d-flex align-items-center" id="themeToggle" type="button" aria-label="Toggle theme">
-          <i class="fa fa-moon me-2" id="themeToggleIcon"></i>
-          <span id="themeToggleLabel">Dark</span>
+        <button class="btn btn-sm btn-outline-secondary d-flex align-items-center px-2 py-1" id="themeToggle" type="button" aria-label="Alternar tema" style="border-radius: 12px; gap: 6px;">
+          <span id="themeToggleIcon" class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width:22px;height:22px;background: rgba(0,0,0,0.08);">
+            <i class="fa fa-moon"></i>
+          </span>
+          <span id="themeToggleLabel" class="small fw-semibold" style="display:none;">Modo oscuro</span>
         </button>
       </div>
       <ul class="navbar-nav  justify-content-end">
@@ -53,32 +55,30 @@
   </div>
 </nav>
 
-{% block extra_js %}
-  {{ block.super }}
-  <script>
-    (function() {
-      const body = document.body;
-      const toggleBtn = document.getElementById('themeToggle');
-      const icon = document.getElementById('themeToggleIcon');
-      const label = document.getElementById('themeToggleLabel');
-      const STORAGE_KEY = 'vitastock-theme';
+<script>
+  (function() {
+    const body = document.body;
+    const toggleBtn = document.getElementById('themeToggle');
+    const icon = document.getElementById('themeToggleIcon');
+    const label = document.getElementById('themeToggleLabel');
+    const STORAGE_KEY = 'vitastock-theme';
 
-      function applyTheme(theme) {
-        body.classList.remove('theme-light', 'theme-dark');
-        body.classList.add(theme);
-        const isDark = theme === 'theme-dark';
-        icon.className = isDark ? 'fa fa-sun me-2' : 'fa fa-moon me-2';
-        label.textContent = isDark ? 'Light' : 'Dark';
-      }
+    function applyTheme(theme) {
+      body.classList.remove('theme-light', 'theme-dark');
+      body.classList.add(theme);
+      const isDark = theme === 'theme-dark';
+      icon.innerHTML = isDark ? '<i class="fa fa-sun"></i>' : '<i class="fa fa-moon"></i>';
+      icon.style.background = isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)';
+      label.textContent = isDark ? 'Modo claro' : 'Modo oscuro';
+    }
 
-      const saved = localStorage.getItem(STORAGE_KEY);
-      applyTheme(saved === 'theme-dark' ? 'theme-dark' : 'theme-light');
+    const saved = localStorage.getItem(STORAGE_KEY);
+    applyTheme(saved === 'theme-light' ? 'theme-light' : 'theme-dark');
 
-      toggleBtn.addEventListener('click', function() {
-        const next = body.classList.contains('theme-dark') ? 'theme-light' : 'theme-dark';
-        applyTheme(next);
-        localStorage.setItem(STORAGE_KEY, next);
-      });
-    })();
-  </script>
-{% endblock extra_js %}
+    toggleBtn.addEventListener('click', function() {
+      const next = body.classList.contains('theme-dark') ? 'theme-light' : 'theme-dark';
+      applyTheme(next);
+      localStorage.setItem(STORAGE_KEY, next);
+    });
+  })();
+</script>

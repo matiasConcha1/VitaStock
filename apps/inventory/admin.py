@@ -11,14 +11,15 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ("name",)
-    search_fields = ("name",)
+    list_display = ("name", "location_type")
+    list_filter = ("location_type",)
+    search_fields = ("name", "notes")
 
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ("name", "category", "unit", "min_stock", "created_at")
-    list_filter = ("category", "unit")
+    list_display = ("name", "category", "unit", "min_stock", "default_location", "created_at")
+    list_filter = ("category", "unit", "default_location")
     search_fields = ("name",)
 
 

@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
@@ -114,8 +115,28 @@ class ProductListView(InventoryBaseMixin, ListView):
     page_title = "Products"
 
     def get_queryset(self):
-        queryset = Product.objects.select_related("category")
-        return filter_by_query(queryset, self.request.GET.get("q"), ["name", "category__name"])
+        queryset = Product.objects.select_related("category", "default_location")
+        return filter_by_query(
+            queryset, self.request.GET.get("q"), ["name", "category__name", "default_location__name"]
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["location_form"] = kwargs.get("location_form") or LocationForm()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """Quick-create location from product list page."""
+        form = LocationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Location created.")
+        else:
+            messages.error(request, "Could not create location. Please fix the errors.")
+            self.object_list = self.get_queryset()
+            context = self.get_context_data(location_form=form)
+            return self.render_to_response(context)
+        return redirect("inventory:product_list")
 
 
 class ProductCreateView(InventoryBaseMixin, SuccessMessageMixin, CreateView):
@@ -127,6 +148,11 @@ class ProductCreateView(InventoryBaseMixin, SuccessMessageMixin, CreateView):
     segment = "inventory_products"
     page_title = "Create Product"
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["files"] = self.request.FILES
+        return kwargs
+
 
 class ProductUpdateView(InventoryBaseMixin, SuccessMessageMixin, UpdateView):
     model = Product
@@ -136,6 +162,11 @@ class ProductUpdateView(InventoryBaseMixin, SuccessMessageMixin, UpdateView):
     success_message = "Product updated successfully."
     segment = "inventory_products"
     page_title = "Edit Product"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["files"] = self.request.FILES
+        return kwargs
 
 
 class ProductDeleteView(InventoryBaseMixin, DeleteView):

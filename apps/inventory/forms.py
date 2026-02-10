@@ -22,13 +22,16 @@ class CategoryForm(BaseForm):
 class LocationForm(BaseForm):
     class Meta:
         model = Location
-        fields = ["name"]
+        fields = ["name", "location_type", "notes"]
 
 
 class ProductForm(BaseForm):
     class Meta:
         model = Product
-        fields = ["name", "category", "unit", "min_stock"]
+        fields = ["name", "category", "unit", "min_stock", "default_location", "image"]
+        widgets = {
+            "image": forms.ClearableFileInput(attrs={"class": "form-control"}),
+        }
 
 
 class BatchForm(BaseForm):

@@ -1,0 +1,65 @@
+{% extends "inventory/base_inventory.html" %}
+
+{% block page_title %}Batches & Expiry{% endblock page_title %}
+
+{% block header_actions %}
+<a href="{% url 'inventory:batch_create' %}" class="btn btn-primary">Create</a>
+{% endblock header_actions %}
+
+{% block inventory_content %}
+<div class="card">
+  <div class="card-body">
+    <form method="get" class="row g-2 mb-3">
+      <div class="col-sm-6 col-md-4">
+        <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search batches...">
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-outline-primary" type="submit">Search</button>
+        <a href="{% url 'inventory:batch_list' %}" class="btn btn-outline-secondary">Clear</a>
+      </div>
+    </form>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-items-center mb-0">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Lot</th>
+            <th>Expiry</th>
+            <th>Qty</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for batch in batches %}
+            <tr>
+              <td>{{ batch.product }}</td>
+              <td>{{ batch.lot_code }}</td>
+              <td>{{ batch.expiry_date }}</td>
+              <td>{{ batch.quantity }}</td>
+              <td>{{ batch.location }}</td>
+              <td>
+                {% if batch.is_expired %}
+                  <span class="badge bg-danger">Expired</span>
+                {% elif batch.expires_soon %}
+                  <span class="badge bg-warning text-dark">Expiring &le; 7d</span>
+                {% else %}
+                  <span class="badge bg-success">OK</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <a href="{% url 'inventory:batch_update' batch.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                <a href="{% url 'inventory:batch_delete' batch.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="7" class="text-center text-muted">No batches yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock inventory_content %}

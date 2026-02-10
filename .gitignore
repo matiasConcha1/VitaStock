@@ -1,16 +1,45 @@
-*.pyc
-*.DS_Store
-*.egg*
-/dist/
-/.idea
-/docs/_build/
-/node_modules/
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Django
+db.sqlite3
+*.sqlite3
+*.log
+staticfiles/
+media/
+
+# Environment variables
+.env
+.env.*
+
+
+# VS Code / IDE
+.vscode/
+.idea/
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build / distributions
 build/
-env
-/staticfiles/
+dist/
+*.egg-info/
+.eggs/
 
-#src
-#*.sqlite*
+# Node (si algún día usas)
+node_modules/
 
-#.env
-node_modules
+# Coverage / tests
+.coverage
+htmlcov/
+.pytest_cache/

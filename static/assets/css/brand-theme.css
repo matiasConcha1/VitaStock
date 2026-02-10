@@ -1,0 +1,56 @@
+/* Global pastel branding for VitaStock */
+
+.sidenav {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(6px);
+}
+
+.navbar-brand-img {
+  max-height: 56px;
+  width: auto;
+}
+
+.navbar-brand span {
+  color: #111111;
+}
+
+.btn-primary, .bg-gradient-primary {
+  background: linear-gradient(90deg, #f57dac 0%, #f39ac3 100%) !important;
+  border: none;
+}
+
+a {
+  color: #d4558b;
+}
+a:hover {
+  color: #b53d73;
+}
+
+/* Theme handling */
+.theme-light {
+  background: linear-gradient(135deg, #ffeef6 0%, #fff7fb 45%, #ffe3f0 100%);
+  color: #1f2933;
+}
+
+.theme-dark {
+  background: #0f1115;
+  color: #e7e9ed;
+}
+
+.theme-dark .card {
+  background: #161920;
+  color: #e7e9ed;
+}
+
+.theme-dark .navbar,
+.theme-dark .sidenav {
+  background: rgba(20, 22, 28, 0.9) !important;
+  color: #e7e9ed;
+}
+
+.theme-dark a {
+  color: #f39ac3;
+}
+.theme-dark a:hover {
+  color: #f57dac;
+}

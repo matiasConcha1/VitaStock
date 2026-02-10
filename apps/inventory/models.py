@@ -16,7 +16,18 @@ class Category(models.Model):
 
 
 class Location(models.Model):
+    class LocationType(models.TextChoices):
+        SHELF = "SHELF", "Shelf"
+        BOX = "BOX", "Box"
+        FURNITURE = "FURNITURE", "Furniture"
+        FRIDGE = "FRIDGE", "Fridge"
+        OTHER = "OTHER", "Other"
+
     name = models.CharField(max_length=100, unique=True)
+    location_type = models.CharField(
+        max_length=20, choices=LocationType.choices, default=LocationType.OTHER
+    )
+    notes = models.TextField(blank=True)
 
     class Meta:
         ordering = ["name"]
@@ -35,6 +46,10 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="products")
     unit = models.CharField(max_length=10, choices=Unit.choices, default=Unit.UNIT)
     min_stock = models.PositiveIntegerField(default=0)
+    default_location = models.ForeignKey(
+        Location, on_delete=models.SET_NULL, related_name="default_products", null=True, blank=True
+    )
+    image = models.ImageField(upload_to="products/", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

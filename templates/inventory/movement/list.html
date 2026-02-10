@@ -1,0 +1,44 @@
+{% extends "inventory/base_inventory.html" %}
+
+{% block page_title %}Movements{% endblock page_title %}
+
+{% block header_actions %}
+<a href="{% url 'inventory:movement_create' %}" class="btn btn-primary">Register movement</a>
+{% endblock header_actions %}
+
+{% block inventory_content %}
+<div class="card">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover align-items-center mb-0">
+        <thead>
+          <tr>
+            <th>Batch</th>
+            <th>Product</th>
+            <th>Type</th>
+            <th>Qty</th>
+            <th>Location</th>
+            <th>Date</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for movement in movements %}
+            <tr>
+              <td>{{ movement.batch.lot_code }}</td>
+              <td>{{ movement.batch.product }}</td>
+              <td>{{ movement.get_movement_type_display }}</td>
+              <td>{{ movement.quantity }}</td>
+              <td>{{ movement.batch.location }}</td>
+              <td>{{ movement.created_at|date:"Y-m-d H:i" }}</td>
+              <td>{{ movement.note|default:"-" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="7" class="text-center text-muted">No movements yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock inventory_content %}

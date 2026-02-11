@@ -1,9 +1,9 @@
-{% extends "inventory/base_inventory.html" %}
+﻿{% extends "inventory/base_inventory.html" %}
 
 {% block page_title %}Movimientos{% endblock page_title %}
 
 {% block header_actions %}
-<a href="{% url 'inventory:movement_create' %}" class="btn btn-primary">Register movement</a>
+<a href="{% url 'inventory:movement_create' %}" class="btn btn-primary">Registrar movimiento</a>
 {% endblock header_actions %}
 
 {% block inventory_content %}
@@ -20,6 +20,7 @@
             <th>Ubicación</th>
             <th>Fecha</th>
             <th>Nota</th>
+            <th class="text-end">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -32,9 +33,13 @@
               <td>{{ movement.batch.location }}</td>
               <td>{{ movement.created_at|date:"Y-m-d H:i" }}</td>
               <td>{{ movement.note|default:"-" }}</td>
+              <td class="text-end">
+                <a href="{% url 'inventory:movement_update' movement.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                <a href="{% url 'inventory:movement_delete' movement.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+              </td>
             </tr>
           {% empty %}
-            <tr><td colspan="7" class="text-center text-muted">Aún no hay movimientos.</td></tr>
+            <tr><td colspan="8" class="text-center text-muted">Aún no hay movimientos.</td></tr>
           {% endfor %}
         </tbody>
       </table>

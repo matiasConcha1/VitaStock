@@ -1,11 +1,11 @@
-{% extends "inventory/base_inventory.html" %}
+﻿{% extends "inventory/base_inventory.html" %}
 
 {% block page_title %}{{ page_title|default:"Movimiento" }}{% endblock page_title %}
 
 {% block inventory_content %}
 <div class="card">
   <div class="card-body">
-    <form method="post" novalidate>
+    <form method="post" novalidate id="movement-form">
       {% csrf_token %}
       {{ form.as_p }}
       <div class="mt-3">
@@ -16,3 +16,70 @@
   </div>
 </div>
 {% endblock inventory_content %}
+
+{% block extra_js %}
+  {{ block.super }}
+  <script>
+    (function() {
+      const selectBatch = document.getElementById("id_batch");
+      const qtyInput = document.getElementById("id_quantity");
+      const typeSelect = document.getElementById("id_movement_type");
+      const destField = document.getElementById("id_destination_location");
+      if (!selectBatch) return;
+
+      function mostrarDisponible() {
+        const text = selectBatch.options[selectBatch.selectedIndex]?.text || "";
+        const match = text.match(/\(disp:\s*([0-9]+)/i);
+        if (match) {
+          const disponible = match[1];
+          if (qtyInput) {
+            qtyInput.setAttribute("max", disponible);
+            qtyInput.setAttribute("placeholder", `Máximo: ${disponible}`);
+            if (qtyInput.value && Number(qtyInput.value) > Number(disponible)) {
+              qtyInput.value = disponible;
+            }
+          }
+          Swal.fire({
+            icon: 'info',
+            title: 'Stock disponible',
+            text: `Puedes mover hasta ${disponible} unidades de este lote.`,
+            confirmButtonText: 'Entendido',
+            background: document.body.classList.contains('theme-dark') ? '#141821' : '#fff',
+            color: document.body.classList.contains('theme-dark') ? '#e7e9ed' : '#111',
+            confirmButtonColor: '#4f46e5'
+          });
+        }
+      }
+
+      selectBatch.addEventListener("change", mostrarDisponible);
+      if (selectBatch.value) {
+        mostrarDisponible();
+      }
+
+      function toggleDestination() {
+        if (!typeSelect || !destField) return;
+        const destWrapper = destField.closest("p");
+        const qtyLabel = qtyInput ? qtyInput.closest("p")?.querySelector("label") : null;
+        const tipo = typeSelect.value;
+        if (tipo === "TRANSFER") {
+          if (destWrapper) destWrapper.style.display = "block";
+          destField.required = true;
+          if (qtyLabel) qtyLabel.textContent = "Cantidad a trasladar:";
+        } else {
+          if (destWrapper) destWrapper.style.display = "none";
+          destField.required = false;
+          destField.value = "";
+          if (qtyLabel) qtyLabel.textContent = "Cantidad:";
+        }
+        if (tipo === "ADJUST" && qtyLabel) {
+          qtyLabel.textContent = "Cantidad nueva:";
+        }
+      }
+
+      if (typeSelect) {
+        typeSelect.addEventListener("change", toggleDestination);
+        toggleDestination();
+      }
+    })();
+  </script>
+{% endblock extra_js %}

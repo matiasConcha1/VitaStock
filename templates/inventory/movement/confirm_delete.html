@@ -1,0 +1,16 @@
+{% extends "inventory/base_inventory.html" %}
+
+{% block page_title %}Eliminar movimiento{% endblock page_title %}
+
+{% block inventory_content %}
+<div class="card">
+  <div class="card-body">
+    <p>¿Seguro que deseas eliminar el movimiento de <strong>{{ object.batch.product }}</strong> ({{ object.get_movement_type_display }})?</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Eliminar</button>
+      <a href="{% url 'inventory:movement_list' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+  </div>
+</div>
+{% endblock inventory_content %}

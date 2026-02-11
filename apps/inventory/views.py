@@ -1,5 +1,7 @@
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
+from django.db.models import Sum
+from django.db.models.functions import Coalesce
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
@@ -32,7 +34,7 @@ class CategoryListView(InventoryBaseMixin, ListView):
     template_name = "inventory/category/list.html"
     context_object_name = "categories"
     segment = "inventory_categories"
-    page_title = "Categories"
+    page_title = "Categorías"
 
 
 class CategoryCreateView(InventoryBaseMixin, SuccessMessageMixin, CreateView):
@@ -42,7 +44,7 @@ class CategoryCreateView(InventoryBaseMixin, SuccessMessageMixin, CreateView):
     success_url = reverse_lazy("inventory:category_list")
     success_message = "Category created successfully."
     segment = "inventory_categories"
-    page_title = "Create Category"
+    page_title = "Crear categoría"
 
 
 class CategoryUpdateView(InventoryBaseMixin, SuccessMessageMixin, UpdateView):
@@ -52,7 +54,7 @@ class CategoryUpdateView(InventoryBaseMixin, SuccessMessageMixin, UpdateView):
     success_url = reverse_lazy("inventory:category_list")
     success_message = "Category updated successfully."
     segment = "inventory_categories"
-    page_title = "Edit Category"
+    page_title = "Editar categoría"
 
 
 class CategoryDeleteView(InventoryBaseMixin, DeleteView):
@@ -60,7 +62,7 @@ class CategoryDeleteView(InventoryBaseMixin, DeleteView):
     template_name = "inventory/category/confirm_delete.html"
     success_url = reverse_lazy("inventory:category_list")
     segment = "inventory_categories"
-    page_title = "Delete Category"
+    page_title = "Eliminar categoría"
 
     def delete(self, request, *args, **kwargs):
         messages.success(request, "Category deleted successfully.")
@@ -72,7 +74,7 @@ class LocationListView(InventoryBaseMixin, ListView):
     template_name = "inventory/location/list.html"
     context_object_name = "locations"
     segment = "inventory_locations"
-    page_title = "Locations"
+    page_title = "Ubicaciones"
 
 
 class LocationCreateView(InventoryBaseMixin, SuccessMessageMixin, CreateView):
@@ -82,7 +84,7 @@ class LocationCreateView(InventoryBaseMixin, SuccessMessageMixin, CreateView):
     success_url = reverse_lazy("inventory:location_list")
     success_message = "Location created successfully."
     segment = "inventory_locations"
-    page_title = "Create Location"
+    page_title = "Crear ubicación"
 
 
 class LocationUpdateView(InventoryBaseMixin, SuccessMessageMixin, UpdateView):
@@ -92,7 +94,7 @@ class LocationUpdateView(InventoryBaseMixin, SuccessMessageMixin, UpdateView):
     success_url = reverse_lazy("inventory:location_list")
     success_message = "Location updated successfully."
     segment = "inventory_locations"
-    page_title = "Edit Location"
+    page_title = "Editar ubicación"
 
 
 class LocationDeleteView(InventoryBaseMixin, DeleteView):
@@ -100,7 +102,7 @@ class LocationDeleteView(InventoryBaseMixin, DeleteView):
     template_name = "inventory/location/confirm_delete.html"
     success_url = reverse_lazy("inventory:location_list")
     segment = "inventory_locations"
-    page_title = "Delete Location"
+    page_title = "Eliminar ubicación"
 
     def delete(self, request, *args, **kwargs):
         messages.success(request, "Location deleted successfully.")
@@ -112,17 +114,30 @@ class ProductListView(InventoryBaseMixin, ListView):
     template_name = "inventory/product/list.html"
     context_object_name = "products"
     segment = "inventory_products"
-    page_title = "Products"
+    page_title = "Productos"
 
     def get_queryset(self):
-        queryset = Product.objects.select_related("category", "default_location")
-        return filter_by_query(
+        queryset = (
+            Product.objects.select_related("category", "default_location")
+            .annotate(total_stock=Coalesce(Sum("batches__quantity"), 0))
+        )
+        queryset = filter_by_query(
             queryset, self.request.GET.get("q"), ["name", "category__name", "default_location__name"]
         )
+        category_id = self.request.GET.get("category")
+        location_id = self.request.GET.get("location")
+        if category_id:
+            queryset = queryset.filter(category_id=category_id)
+        if location_id:
+            queryset = queryset.filter(default_location_id=location_id)
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["location_form"] = kwargs.get("location_form") or LocationForm()
+        context["categories"] = Category.objects.all()
+        context["locations"] = Location.objects.all()
+        context["total_products"] = self.object_list.count() if hasattr(self, "object_list") else Product.objects.count()
         return context
 
     def post(self, request, *args, **kwargs):
@@ -144,9 +159,9 @@ class ProductCreateView(InventoryBaseMixin, SuccessMessageMixin, CreateView):
     template_name = "inventory/product/form.html"
     form_class = ProductForm
     success_url = reverse_lazy("inventory:product_list")
-    success_message = "Product created successfully."
+    success_message = "Producto creado con éxito."
     segment = "inventory_products"
-    page_title = "Create Product"
+    page_title = "Crear producto"
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -159,9 +174,9 @@ class ProductUpdateView(InventoryBaseMixin, SuccessMessageMixin, UpdateView):
     template_name = "inventory/product/form.html"
     form_class = ProductForm
     success_url = reverse_lazy("inventory:product_list")
-    success_message = "Product updated successfully."
+    success_message = "Producto actualizado con éxito."
     segment = "inventory_products"
-    page_title = "Edit Product"
+    page_title = "Editar producto"
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -186,7 +201,7 @@ class BatchListView(InventoryBaseMixin, ListView):
     template_name = "inventory/batch/list.html"
     context_object_name = "batches"
     segment = "inventory_batches"
-    page_title = "Batches"
+    page_title = "Lotes"
 
     def get_queryset(self):
         queryset = Batch.objects.select_related("product", "location", "product__category")
@@ -204,7 +219,7 @@ class BatchCreateView(InventoryBaseMixin, SuccessMessageMixin, CreateView):
     success_url = reverse_lazy("inventory:batch_list")
     success_message = "Batch created successfully."
     segment = "inventory_batches"
-    page_title = "Create Batch"
+    page_title = "Crear lote"
 
 
 class BatchUpdateView(InventoryBaseMixin, SuccessMessageMixin, UpdateView):
@@ -214,7 +229,7 @@ class BatchUpdateView(InventoryBaseMixin, SuccessMessageMixin, UpdateView):
     success_url = reverse_lazy("inventory:batch_list")
     success_message = "Batch updated successfully."
     segment = "inventory_batches"
-    page_title = "Edit Batch"
+    page_title = "Editar lote"
 
 
 class BatchDeleteView(InventoryBaseMixin, DeleteView):
@@ -222,7 +237,7 @@ class BatchDeleteView(InventoryBaseMixin, DeleteView):
     template_name = "inventory/batch/confirm_delete.html"
     success_url = reverse_lazy("inventory:batch_list")
     segment = "inventory_batches"
-    page_title = "Delete Batch"
+    page_title = "Eliminar lote"
 
     def delete(self, request, *args, **kwargs):
         messages.success(request, "Batch deleted successfully.")
@@ -234,7 +249,7 @@ class MovementListView(InventoryBaseMixin, ListView):
     template_name = "inventory/movement/list.html"
     context_object_name = "movements"
     segment = "inventory_movements"
-    page_title = "Movements"
+    page_title = "Movimientos"
 
     def get_queryset(self):
         return (
@@ -250,7 +265,7 @@ class MovementCreateView(InventoryBaseMixin, SuccessMessageMixin, CreateView):
     success_url = reverse_lazy("inventory:movement_list")
     success_message = "Movement registered successfully."
     segment = "inventory_movements"
-    page_title = "Register Movement"
+    page_title = "Registrar movimiento"
 
     def form_valid(self, form):
         response = super().form_valid(form)

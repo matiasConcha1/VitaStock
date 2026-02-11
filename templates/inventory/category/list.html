@@ -1,9 +1,9 @@
-{% extends "inventory/base_inventory.html" %}
+﻿{% extends "inventory/base_inventory.html" %}
 
 {% block page_title %}Categorías{% endblock page_title %}
 
 {% block header_actions %}
-<a href="{% url 'inventory:category_create' %}" class="btn btn-primary">Create</a>
+<a href="{% url 'inventory:category_create' %}" class="btn btn-primary">Crear</a>
 {% endblock header_actions %}
 
 {% block inventory_content %}
@@ -13,8 +13,8 @@
       <table class="table table-hover align-items-center mb-0">
         <thead>
           <tr>
-            <th>Name</th>
-            <th class="text-end">Actions</th>
+            <th>Nombre</th>
+            <th class="text-end">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -22,12 +22,12 @@
             <tr>
               <td>{{ category.name }}</td>
               <td class="text-end">
-                <a href="{% url 'inventory:category_update' category.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
-                <a href="{% url 'inventory:category_delete' category.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                <a href="{% url 'inventory:category_update' category.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                <a href="{% url 'inventory:category_delete' category.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
               </td>
             </tr>
           {% empty %}
-            <tr><td colspan="2" class="text-center text-muted">No categories yet.</td></tr>
+            <tr><td colspan="2" class="text-center text-muted">Aún no hay categorías.</td></tr>
           {% endfor %}
         </tbody>
       </table>

@@ -22,3 +22,47 @@
   {% block inventory_content %}{% endblock inventory_content %}
 </div>
 {% endblock content %}
+
+{% block extra_js %}
+  {{ block.super }}
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    (function() {
+      const levelToIcon = {
+        success: 'success',
+        info: 'info',
+        warning: 'warning',
+        error: 'error',
+        debug: 'info'
+      };
+      const prefersDark = document.body.classList.contains('theme-dark');
+      const swalTheme = prefersDark ? {
+        background: '#141821',
+        color: '#e7e9ed',
+        confirmButtonColor: '#6366f1'
+      } : {
+        background: '#fff',
+        color: '#111',
+        confirmButtonColor: '#4f46e5'
+      };
+      {% if messages %}
+      const flashMessages = [
+        {% for message in messages %}
+          {text: "{{ message|escapejs }}", level: "{{ message.tags|default:'info' }}"}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ];
+      flashMessages.forEach(msg => {
+        Swal.fire({
+          text: msg.text,
+          icon: levelToIcon[msg.level] || 'info',
+          confirmButtonText: 'OK',
+          background: swalTheme.background,
+          color: swalTheme.color,
+          confirmButtonColor: swalTheme.confirmButtonColor,
+          customClass: {popup: 'swal2-shadow'}
+        });
+      });
+      {% endif %}
+    })();
+  </script>
+{% endblock extra_js %}

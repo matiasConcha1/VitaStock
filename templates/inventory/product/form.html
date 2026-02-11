@@ -5,20 +5,87 @@
 {% block inventory_content %}
 <div class="card">
   <div class="card-body">
-    <form method="post" enctype="multipart/form-data" novalidate>
+    <form id="product-form" method="post" enctype="multipart/form-data" novalidate>
       {% csrf_token %}
       {{ form.as_p }}
-      {% if form.instance.pk and form.instance.image %}
-        <div class="mb-3">
-          <label class="form-label">Imagen actual</label><br>
-          <img src="{{ form.instance.image.url }}" alt="{{ form.instance.name }}" style="width:96px; height:96px; object-fit:cover; border-radius:10px;">
-        </div>
-      {% endif %}
-      <div class="mt-3">
-        <button type="submit" class="btn btn-primary">Guardar</button>
-        <a href="{% url 'inventory:product_list' %}" class="btn btn-secondary">Cancelar</a>
+      <div class="mb-3" id="preview-wrapper" style="display: {% if form.instance.pk and form.instance.image %}block{% else %}none{% endif %};">
+        <label class="form-label">Vista previa</label><br>
+        {% if form.instance.pk and form.instance.image %}
+          <img id="image-preview" src="{{ form.instance.image.url }}" alt="{{ form.instance.name }}" style="width:120px; height:120px; object-fit:cover; border-radius:10px;">
+        {% else %}
+          <img id="image-preview" src="" alt="Vista previa" style="width:120px; height:120px; object-fit:cover; border-radius:10px; display:none;">
+        {% endif %}
+      </div>
+      <div class="mt-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary" id="btn-submit">Guardar</button>
+        <a href="{% url 'inventory:product_list' %}" class="btn btn-secondary" id="btn-cancel">Cancelar</a>
+        {% if form.instance.pk %}
+        <a href="{% url 'inventory:product_delete' form.instance.pk %}" class="btn btn-outline-danger">Eliminar</a>
+        {% endif %}
       </div>
     </form>
   </div>
 </div>
+{% block extra_js %}
+  {{ block.super }}
+  <script>
+    (function() {
+      const input = document.getElementById("id_image");
+      const form = document.getElementById("product-form");
+      const cancelBtn = document.getElementById("btn-cancel");
+      if (input) {
+        const previewWrapper = document.getElementById("preview-wrapper");
+        const preview = document.getElementById("image-preview");
+        input.addEventListener("change", function(ev) {
+          const file = ev.target.files && ev.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+              preview.src = e.target.result;
+              preview.style.display = "block";
+              previewWrapper.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+
+      if (form) {
+        form.addEventListener("submit", function(e) {
+          if (!form.checkValidity()) {
+            e.preventDefault();
+            form.reportValidity();
+            Swal.fire({
+              icon: 'warning',
+              title: 'Faltan campos obligatorios',
+              text: 'Completa los campos marcados con * antes de guardar.',
+              confirmButtonText: 'Entendido',
+              confirmButtonColor: '#4f46e5'
+            });
+          }
+        });
+      }
+
+      if (cancelBtn) {
+        cancelBtn.addEventListener("click", function(e) {
+          e.preventDefault();
+          Swal.fire({
+            icon: 'question',
+            title: '¿Cancelar creación?',
+            text: 'No se guardará el producto.',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, cancelar',
+            cancelButtonText: 'Seguir editando',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#4f46e5'
+          }).then(result => {
+            if (result.isConfirmed) {
+              window.location.href = cancelBtn.getAttribute("href");
+            }
+          });
+        });
+      }
+    })();
+  </script>
+{% endblock extra_js %}
 {% endblock inventory_content %}

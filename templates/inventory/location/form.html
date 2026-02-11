@@ -1,6 +1,6 @@
-{% extends "inventory/base_inventory.html" %}
+﻿{% extends "inventory/base_inventory.html" %}
 
-{% block page_title %}{{ page_title|default:"Ubicación" }}{% endblock page_title %}
+{% block page_title %}Ubicación{% endblock page_title %}
 
 {% block inventory_content %}
 <div class="card">
@@ -8,9 +8,9 @@
     <form method="post" novalidate>
       {% csrf_token %}
       {{ form.as_p }}
-      <div class="mt-3">
-        <button type="submit" class="btn btn-primary">Save</button>
-        <a href="{% url 'inventory:location_list' %}" class="btn btn-secondary">Cancel</a>
+      <div class="mt-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'inventory:location_list' %}" class="btn btn-secondary">Cancelar</a>
       </div>
     </form>
   </div>

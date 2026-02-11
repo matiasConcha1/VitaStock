@@ -3,43 +3,41 @@
 {% block page_title %}Productos{% endblock page_title %}
 
 {% block header_actions %}
-<a href="{% url 'inventory:product_create' %}" class="btn btn-primary">Crear producto</a>
+<div class="d-flex flex-wrap gap-2">
+  <a href="{% url 'inventory:location_create' %}" class="btn btn-outline-secondary">+ Nueva ubicación</a>
+  <a href="{% url 'inventory:product_create' %}" class="btn btn-primary">+ Crear producto</a>
+</div>
 {% endblock header_actions %}
 
 {% block inventory_content %}
-<div class="card mb-3">
-  <div class="card-body">
-    <h6 class="text-uppercase text-xs text-muted mb-2">Crear ubicación rápida</h6>
-    <form method="post" class="row g-2 align-items-end">
-      {% csrf_token %}
-      <div class="col-sm-3">
-        <label class="form-label small mb-1">Nombre</label>
-        {{ location_form.name }}
-      </div>
-      <div class="col-sm-3">
-        <label class="form-label small mb-1">Tipo</label>
-        {{ location_form.location_type }}
-      </div>
-      <div class="col-sm-4">
-        <label class="form-label small mb-1">Notas</label>
-        {{ location_form.notes }}
-      </div>
-      <div class="col-sm-2">
-        <button type="submit" class="btn btn-outline-primary w-100">+ Nueva ubicación</button>
-      </div>
-    </form>
-  </div>
-</div>
-
 <div class="card">
   <div class="card-body">
-    <form method="get" class="row g-2 mb-3">
-      <div class="col-sm-6 col-md-4">
-        <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Buscar productos...">
+    <form method="get" class="row g-3 mb-3 align-items-end">
+      <div class="col-lg-4">
+        <label class="form-label small">Buscar</label>
+        <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Buscar por nombre o categoría...">
       </div>
-      <div class="col-auto">
-        <button class="btn btn-outline-primary" type="submit">Buscar</button>
-        <a href="{% url 'inventory:product_list' %}" class="btn btn-outline-secondary">Limpiar</a>
+      <div class="col-lg-3">
+        <label class="form-label small">Categoría</label>
+        <select name="category" class="form-control">
+          <option value="">Todas</option>
+          {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if request.GET.category == cat.id|stringformat:'s' %}selected{% endif %}>{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-lg-3">
+        <label class="form-label small">Ubicación</label>
+        <select name="location" class="form-control">
+          <option value="">Todas</option>
+          {% for loc in locations %}
+            <option value="{{ loc.id }}" {% if request.GET.location == loc.id|stringformat:'s' %}selected{% endif %}>{{ loc.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-lg-2 d-flex gap-2">
+        <button class="btn btn-primary w-100" type="submit">Buscar</button>
+        <a href="{% url 'inventory:product_list' %}" class="btn btn-outline-secondary w-100">Limpiar</a>
       </div>
     </form>
 
@@ -47,40 +45,50 @@
       <table class="table table-hover align-items-center mb-0">
         <thead>
           <tr>
-            <th>Imagen</th>
-            <th>Imagen</th>
-            <th>Nombre</th>
-            <th>Categoría</th>
-            <th>Ubicación por defecto</th>
-            <th>Unidad</th>
-            <th>Mín. stock</th>
-            <th class="text-end">Acciones</th>
+            <th class="text-center">Imagen</th>
+            <th class="text-center">Nombre</th>
+            <th class="text-center">Categoría</th>
+            <th class="text-center">Ubicación</th>
+            <th class="text-center">Unidad</th>
+            <th class="text-center">Mín. stock</th>
+            <th class="text-center">Stock</th>
+            <th class="text-center">Acciones</th>
           </tr>
         </thead>
         <tbody>
           {% for product in products %}
             <tr>
-              <td>
+              <td class="text-center">
                 {% if product.image %}
-                  <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width:56px; height:56px; object-fit:cover; border-radius:8px;">
+                  <a href="{{ product.image.url }}" target="_blank">
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width:48px; height:48px; object-fit:cover; border-radius:10px;">
+                  </a>
                 {% else %}
-                  <div class="bg-light border rounded d-flex align-items-center justify-content-center" style="width:56px; height:56px;">
+                  <div class="bg-light border rounded d-flex align-items-center justify-content-center" style="width:48px; height:48px;">
                     <i class="fa fa-box text-muted"></i>
                   </div>
                 {% endif %}
               </td>
-              <td>{{ product.name }}</td>
-              <td>{{ product.category }}</td>
-              <td>{{ product.default_location|default:"—" }}</td>
-              <td>{{ product.get_unit_display }}</td>
-              <td>{{ product.min_stock }}</td>
-              <td class="text-end">
+              <td class="text-center">{{ product.name }}</td>
+              <td class="text-center">{{ product.category }}</td>
+              <td class="text-center">{{ product.default_location|default:"—" }}</td>
+              <td class="text-center">{{ product.get_unit_display }}</td>
+              <td class="text-center">{{ product.min_stock }}</td>
+              <td class="text-center">
+                {% if product.total_stock < product.min_stock %}
+                  <span class="badge bg-danger">Bajo</span>
+                {% else %}
+                  <span class="badge bg-success">OK</span>
+                {% endif %}
+                <span class="text-muted small ms-1">{{ product.total_stock|default:0 }}</span>
+              </td>
+              <td class="text-center">
                 <a href="{% url 'inventory:product_update' product.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
                 <a href="{% url 'inventory:product_delete' product.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
               </td>
             </tr>
           {% empty %}
-            <tr><td colspan="7" class="text-center text-muted">Aún no hay productos.</td></tr>
+            <tr><td colspan="8" class="text-center text-muted">Aún no hay productos. Crea el primero.</td></tr>
           {% endfor %}
         </tbody>
       </table>

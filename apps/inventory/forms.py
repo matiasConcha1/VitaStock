@@ -1,6 +1,12 @@
-from django import forms
+﻿from django import forms
 
 from .models import Batch, Category, Location, Movement, Product
+
+
+class SpanishClearableFileInput(forms.ClearableFileInput):
+    clear_checkbox_label = "Eliminar"
+    initial_text = "Actual"
+    input_text = "Cambiar"
 
 
 class BaseForm(forms.ModelForm):
@@ -23,12 +29,19 @@ class CategoryForm(BaseForm):
     class Meta:
         model = Category
         fields = ["name"]
+        labels = {"name": "Nombre"}
+        error_messages = {"name": {"required": "Este campo es obligatorio."}}
 
 
 class LocationForm(BaseForm):
     class Meta:
         model = Location
         fields = ["name", "location_type", "notes"]
+        labels = {
+            "name": "Nombre",
+            "location_type": "Tipo",
+            "notes": "Notas",
+        }
         widgets = {
             "notes": forms.Textarea(attrs={"rows": 2}),
         }
@@ -41,8 +54,8 @@ class LocationForm(BaseForm):
 class ProductForm(BaseForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Valores por defecto solo al crear
         if not self.instance.pk:
+            # Valores por defecto solo al crear
             first_cat = self.fields["category"].queryset.first()
             if first_cat and not self.initial.get("category"):
                 self.initial["category"] = first_cat.pk
@@ -92,7 +105,7 @@ class ProductForm(BaseForm):
             "image": "Imagen",
         }
         widgets = {
-            "image": forms.ClearableFileInput(attrs={"class": "form-control", "accept": "image/*"}),
+            "image": SpanishClearableFileInput(attrs={"class": "form-control", "accept": "image/*"}),
         }
         error_messages = {
             "name": {"required": "Este campo es obligatorio."},
@@ -129,19 +142,28 @@ class MovementForm(BaseForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if "batch" in self.fields:
-            self.fields["batch"].empty_label = "Lote"
+            self.fields["batch"].empty_label = "Seleccione lote"
             self.fields["batch"].label = "Lote"
+            self.fields["batch"].label_from_instance = (
+                lambda obj: f"{obj.lot_code} - {obj.product.name} (disp: {obj.quantity})"
+            )
         if "movement_type" in self.fields:
             self.fields["movement_type"].label = "Tipo de movimiento"
-            self.fields["movement_type"].empty_label = "Tipo de movimiento"
+            self.fields["movement_type"].choices = [("", "Seleccione tipo de movimiento")] + list(
+                Movement.MovementType.choices
+            )
         if "quantity" in self.fields:
             self.fields["quantity"].label = "Cantidad"
+            self.fields["quantity"].widget.attrs.update({"min": 1})
+        if "destination_location" in self.fields:
+            self.fields["destination_location"].label = "Ubicación destino"
+            self.fields["destination_location"].empty_label = "Seleccione ubicación"
         if "note" in self.fields:
             self.fields["note"].label = "Nota"
 
     class Meta:
         model = Movement
-        fields = ["batch", "movement_type", "quantity", "note"]
+        fields = ["batch", "movement_type", "quantity", "destination_location", "note"]
         widgets = {
             "note": forms.Textarea(attrs={"rows": 3}),
         }

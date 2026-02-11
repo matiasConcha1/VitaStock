@@ -1,4 +1,4 @@
-from django.contrib import messages
+﻿from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Sum
 from django.db.models.functions import Coalesce
@@ -7,13 +7,7 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
 from .filters import filter_by_query
-from .forms import (
-    BatchForm,
-    CategoryForm,
-    LocationForm,
-    MovementForm,
-    ProductForm,
-)
+from .forms import BatchForm, CategoryForm, LocationForm, MovementForm, ProductForm
 from .models import Batch, Category, Location, Movement, Product
 
 
@@ -42,7 +36,7 @@ class CategoryCreateView(InventoryBaseMixin, SuccessMessageMixin, CreateView):
     template_name = "inventory/category/form.html"
     form_class = CategoryForm
     success_url = reverse_lazy("inventory:category_list")
-    success_message = "Category created successfully."
+    success_message = "Categoría creada con éxito."
     segment = "inventory_categories"
     page_title = "Crear categoría"
 
@@ -52,7 +46,7 @@ class CategoryUpdateView(InventoryBaseMixin, SuccessMessageMixin, UpdateView):
     template_name = "inventory/category/form.html"
     form_class = CategoryForm
     success_url = reverse_lazy("inventory:category_list")
-    success_message = "Category updated successfully."
+    success_message = "Categoría actualizada con éxito."
     segment = "inventory_categories"
     page_title = "Editar categoría"
 
@@ -65,7 +59,7 @@ class CategoryDeleteView(InventoryBaseMixin, DeleteView):
     page_title = "Eliminar categoría"
 
     def delete(self, request, *args, **kwargs):
-        messages.success(request, "Category deleted successfully.")
+        messages.success(request, "Categoría eliminada con éxito.")
         return super().delete(request, *args, **kwargs)
 
 
@@ -82,7 +76,7 @@ class LocationCreateView(InventoryBaseMixin, SuccessMessageMixin, CreateView):
     template_name = "inventory/location/form.html"
     form_class = LocationForm
     success_url = reverse_lazy("inventory:location_list")
-    success_message = "Location created successfully."
+    success_message = "Ubicación creada con éxito."
     segment = "inventory_locations"
     page_title = "Crear ubicación"
 
@@ -92,7 +86,7 @@ class LocationUpdateView(InventoryBaseMixin, SuccessMessageMixin, UpdateView):
     template_name = "inventory/location/form.html"
     form_class = LocationForm
     success_url = reverse_lazy("inventory:location_list")
-    success_message = "Location updated successfully."
+    success_message = "Ubicación actualizada con éxito."
     segment = "inventory_locations"
     page_title = "Editar ubicación"
 
@@ -105,7 +99,7 @@ class LocationDeleteView(InventoryBaseMixin, DeleteView):
     page_title = "Eliminar ubicación"
 
     def delete(self, request, *args, **kwargs):
-        messages.success(request, "Location deleted successfully.")
+        messages.success(request, "Ubicación eliminada con éxito.")
         return super().delete(request, *args, **kwargs)
 
 
@@ -141,13 +135,13 @@ class ProductListView(InventoryBaseMixin, ListView):
         return context
 
     def post(self, request, *args, **kwargs):
-        """Quick-create location from product list page."""
+        """Creación rápida de ubicación desde la lista de productos."""
         form = LocationForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, "Location created.")
+            messages.success(request, "Ubicación creada.")
         else:
-            messages.error(request, "Could not create location. Please fix the errors.")
+            messages.error(request, "No se pudo crear la ubicación. Corrige los errores.")
             self.object_list = self.get_queryset()
             context = self.get_context_data(location_form=form)
             return self.render_to_response(context)
@@ -165,7 +159,8 @@ class ProductCreateView(InventoryBaseMixin, SuccessMessageMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs["files"] = self.request.FILES
+        if self.request.method in ("POST", "PUT", "PATCH") and self.request.FILES:
+            kwargs["files"] = self.request.FILES
         return kwargs
 
 
@@ -180,7 +175,8 @@ class ProductUpdateView(InventoryBaseMixin, SuccessMessageMixin, UpdateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs["files"] = self.request.FILES
+        if self.request.method in ("POST", "PUT", "PATCH") and self.request.FILES:
+            kwargs["files"] = self.request.FILES
         return kwargs
 
 
@@ -189,10 +185,10 @@ class ProductDeleteView(InventoryBaseMixin, DeleteView):
     template_name = "inventory/product/confirm_delete.html"
     success_url = reverse_lazy("inventory:product_list")
     segment = "inventory_products"
-    page_title = "Delete Product"
+    page_title = "Eliminar producto"
 
     def delete(self, request, *args, **kwargs):
-        messages.success(request, "Product deleted successfully.")
+        messages.success(request, "Producto eliminado con éxito.")
         return super().delete(request, *args, **kwargs)
 
 
@@ -217,7 +213,7 @@ class BatchCreateView(InventoryBaseMixin, SuccessMessageMixin, CreateView):
     template_name = "inventory/batch/form.html"
     form_class = BatchForm
     success_url = reverse_lazy("inventory:batch_list")
-    success_message = "Batch created successfully."
+    success_message = "Lote creado con éxito."
     segment = "inventory_batches"
     page_title = "Crear lote"
 
@@ -227,7 +223,7 @@ class BatchUpdateView(InventoryBaseMixin, SuccessMessageMixin, UpdateView):
     template_name = "inventory/batch/form.html"
     form_class = BatchForm
     success_url = reverse_lazy("inventory:batch_list")
-    success_message = "Batch updated successfully."
+    success_message = "Lote actualizado con éxito."
     segment = "inventory_batches"
     page_title = "Editar lote"
 
@@ -240,7 +236,7 @@ class BatchDeleteView(InventoryBaseMixin, DeleteView):
     page_title = "Eliminar lote"
 
     def delete(self, request, *args, **kwargs):
-        messages.success(request, "Batch deleted successfully.")
+        messages.success(request, "Lote eliminado con éxito.")
         return super().delete(request, *args, **kwargs)
 
 
@@ -252,10 +248,7 @@ class MovementListView(InventoryBaseMixin, ListView):
     page_title = "Movimientos"
 
     def get_queryset(self):
-        return (
-            Movement.objects.select_related("batch", "batch__product", "batch__location")
-            .all()
-        )
+        return Movement.objects.select_related("batch", "batch__product", "batch__location")
 
 
 class MovementCreateView(InventoryBaseMixin, SuccessMessageMixin, CreateView):
@@ -263,7 +256,7 @@ class MovementCreateView(InventoryBaseMixin, SuccessMessageMixin, CreateView):
     template_name = "inventory/movement/form.html"
     form_class = MovementForm
     success_url = reverse_lazy("inventory:movement_list")
-    success_message = "Movement registered successfully."
+    success_message = "Movimiento registrado con éxito."
     segment = "inventory_movements"
     page_title = "Registrar movimiento"
 
@@ -271,3 +264,25 @@ class MovementCreateView(InventoryBaseMixin, SuccessMessageMixin, CreateView):
         response = super().form_valid(form)
         messages.success(self.request, self.success_message)
         return response
+
+
+class MovementUpdateView(InventoryBaseMixin, SuccessMessageMixin, UpdateView):
+    model = Movement
+    template_name = "inventory/movement/form.html"
+    form_class = MovementForm
+    success_url = reverse_lazy("inventory:movement_list")
+    success_message = "Movimiento actualizado con éxito."
+    segment = "inventory_movements"
+    page_title = "Editar movimiento"
+
+
+class MovementDeleteView(InventoryBaseMixin, DeleteView):
+    model = Movement
+    template_name = "inventory/movement/confirm_delete.html"
+    success_url = reverse_lazy("inventory:movement_list")
+    segment = "inventory_movements"
+    page_title = "Eliminar movimiento"
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, "Movimiento eliminado con éxito.")
+        return super().delete(request, *args, **kwargs)

@@ -28,4 +28,6 @@ urlpatterns = [
     # Movements
     path("movements/", views.MovementListView.as_view(), name="movement_list"),
     path("movements/create/", views.MovementCreateView.as_view(), name="movement_create"),
+    path("movements/<int:pk>/edit/", views.MovementUpdateView.as_view(), name="movement_update"),
+    path("movements/<int:pk>/delete/", views.MovementDeleteView.as_view(), name="movement_delete"),
 ]

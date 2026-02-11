@@ -14,6 +14,10 @@ import os, random, string
 from pathlib import Path
 from dotenv import load_dotenv
 from str2bool import str2bool
+try:
+    import pillow_avif_plugin  # noqa: F401
+except ImportError:
+    pillow_avif_plugin = None
 
 load_dotenv()  # take environment variables from .env.
 

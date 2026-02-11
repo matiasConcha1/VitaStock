@@ -214,6 +214,26 @@ a:hover {
   color: #9aa3b7 !important;
 }
 
+.theme-dark input[type="file"] {
+  background: #1a1f2a;
+  color: #e7e9ed;
+  border-color: #2a3040;
+}
+
+.theme-dark input[type="file"]::file-selector-button {
+  background: #2a3040;
+  color: #e7e9ed;
+  border: 1px solid #3a4154;
+  border-radius: 6px;
+  padding: 6px 12px;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.theme-dark input[type="file"]::file-selector-button:hover {
+  background: #3a4154;
+}
+
 .theme-dark .btn-outline-primary {
   color: #8da2ff;
   border-color: #8da2ff;
@@ -231,4 +251,16 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 input[type="number"] {
   -moz-appearance: textfield;
+}
+
+/* Asterisco rojo para campos requeridos */
+label.required::after {
+  content: " *";
+  color: #e63946;
+  font-weight: 700;
+}
+
+/* Ocultar textos de error por defecto "Este campo es obligatorio." */
+.errorlist {
+  display: none;
 }

@@ -17,17 +17,21 @@ class Category(models.Model):
 
 class Location(models.Model):
     class LocationType(models.TextChoices):
-        SHELF = "SHELF", "Shelf"
-        BOX = "BOX", "Box"
-        FURNITURE = "FURNITURE", "Furniture"
-        FRIDGE = "FRIDGE", "Fridge"
-        OTHER = "OTHER", "Other"
+        SHELF = "SHELF", "Estante"
+        BOX = "BOX", "Caja"
+        FURNITURE = "FURNITURE", "Mueble"
+        FRIDGE = "FRIDGE", "Refrigerador"
+        FREEZER = "FREEZER", "Congeladora"
+        OTHER = "OTHER", "Otro"
 
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100, unique=True, verbose_name="Nombre")
     location_type = models.CharField(
-        max_length=20, choices=LocationType.choices, default=LocationType.OTHER
+        max_length=20,
+        choices=LocationType.choices,
+        default=LocationType.OTHER,
+        verbose_name="Tipo de ubicación",
     )
-    notes = models.TextField(blank=True)
+    notes = models.TextField(blank=True, verbose_name="Notas")
 
     class Meta:
         ordering = ["name"]
@@ -38,19 +42,28 @@ class Location(models.Model):
 
 class Product(models.Model):
     class Unit(models.TextChoices):
-        UNIT = "unit", "Unit"
+        UNIT = "unit", "Unidad"
         KILOGRAM = "kg", "Kg"
-        LITER = "lt", "Liter"
+        LITER = "lt", "Lt"
+        CC = "cc", "Cc"
+        GRAM = "gr", "Gr"
 
-    name = models.CharField(max_length=150)
-    category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="products")
-    unit = models.CharField(max_length=10, choices=Unit.choices, default=Unit.UNIT)
-    min_stock = models.PositiveIntegerField(default=0)
-    default_location = models.ForeignKey(
-        Location, on_delete=models.SET_NULL, related_name="default_products", null=True, blank=True
+    name = models.CharField(max_length=150, verbose_name="Nombre")
+    category = models.ForeignKey(
+        Category, on_delete=models.PROTECT, related_name="products", verbose_name="Categoría"
     )
-    image = models.ImageField(upload_to="products/", null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    unit = models.CharField(max_length=10, choices=Unit.choices, default=Unit.UNIT, verbose_name="Unidad")
+    min_stock = models.PositiveIntegerField(default=1, verbose_name="Stock mínimo")
+    default_location = models.ForeignKey(
+        Location,
+        on_delete=models.SET_NULL,
+        related_name="default_products",
+        null=True,
+        blank=True,
+        verbose_name="Ubicación por defecto",
+    )
+    image = models.FileField(upload_to="products/", null=True, blank=True, verbose_name="Imagen")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Creado")
 
     class Meta:
         ordering = ["name"]
@@ -62,11 +75,11 @@ class Product(models.Model):
 
 class Batch(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="batches")
-    lot_code = models.CharField(max_length=100)
-    expiry_date = models.DateField()
-    quantity = models.PositiveIntegerField(default=0)
-    location = models.ForeignKey(Location, on_delete=models.PROTECT, related_name="batches")
-    created_at = models.DateTimeField(auto_now_add=True)
+    lot_code = models.CharField(max_length=100, verbose_name="Código de lote")
+    expiry_date = models.DateField(verbose_name="Fecha de vencimiento")
+    quantity = models.PositiveIntegerField(default=0, verbose_name="Cantidad")
+    location = models.ForeignKey(Location, on_delete=models.PROTECT, related_name="batches", verbose_name="Ubicación")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Creado")
 
     class Meta:
         ordering = ["expiry_date"]
@@ -95,10 +108,10 @@ class Batch(models.Model):
 
 class Movement(models.Model):
     class MovementType(models.TextChoices):
-        IN = "IN", "In"
-        OUT = "OUT", "Out"
-        WASTE = "WASTE", "Waste"
-        ADJUST = "ADJUST", "Adjust"
+        IN = "IN", "Entrada"
+        OUT = "OUT", "Salida"
+        WASTE = "WASTE", "Merma"
+        ADJUST = "ADJUST", "Ajuste"
 
     batch = models.ForeignKey(Batch, on_delete=models.CASCADE, related_name="movements")
     movement_type = models.CharField(max_length=10, choices=MovementType.choices)

@@ -122,6 +122,9 @@ class BatchForm(BaseForm):
             self.fields["product"].empty_label = "Producto"
         if "location" in self.fields:
             self.fields["location"].empty_label = "Ubicación"
+        # Asegurar que en edición se muestre la fecha existente en formato ISO (compat. con input date)
+        if self.instance and self.instance.pk and self.instance.expiry_date:
+            self.initial["expiry_date"] = self.instance.expiry_date.strftime("%Y-%m-%d")
 
     class Meta:
         model = Batch
@@ -134,8 +137,9 @@ class BatchForm(BaseForm):
             "location": "Ubicación",
         }
         widgets = {
-            "expiry_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "expiry_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}, format="%Y-%m-%d"),
         }
+        input_formats = {"expiry_date": ["%Y-%m-%d"]}
 
 
 class MovementForm(BaseForm):

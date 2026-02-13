@@ -1,0 +1,245 @@
+﻿{% extends "inventory/base_inventory.html" %}
+
+{% block page_title %}Panel de control{% endblock page_title %}
+
+{% block header_actions %}
+<div class="dropdown">
+  <button class="btn btn-primary dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <span>Nueva acción</span>
+    <span class="ms-1">▼</span>
+  </button>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" href="{% url 'inventory:product_create' %}">Crear producto</a></li>
+    <li><a class="dropdown-item" href="{% url 'inventory:batch_create' %}">Crear lote</a></li>
+    <li><a class="dropdown-item" href="{% url 'inventory:movement_create' %}">Registrar movimiento</a></li>
+    <li><a class="dropdown-item" href="{% url 'inventory:location_create' %}">Crear ubicación</a></li>
+  </ul>
+</div>
+{% endblock header_actions %}
+
+{% block inventory_content %}
+<div class="row g-4 mb-2">
+  <div class="col-12">
+    <p class="text-sm text-muted mb-0">Visión general del inventario y vencimientos</p>
+  </div>
+  {% for item in kpi_items %}
+  <div class="col-md-3 col-sm-6">
+    <div class="card h-100 border">
+      <div class="card-body py-3">
+        <p class="text-sm text-muted mb-1">{{ item.title }}</p>
+        <h4 class="mb-1">{{ item.value }}</h4>
+        <span class="text-xs text-muted">{{ item.note }}</span>
+        <p class="text-xs text-muted mb-0">Sin variación</p>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="row g-4 mb-2">
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-header pb-2 d-flex justify-content-between align-items-center">
+        <div>
+          <h6 class="mb-0">Vencimientos próximos</h6>
+          <p class="text-sm text-muted mb-0">Calendario mensual (próximos 90 días)</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-outline-secondary btn-sm" id="cal-prev">‹</button>
+          <span id="cal-title" class="text-sm fw-bold"></span>
+          <button class="btn btn-outline-secondary btn-sm" id="cal-next">›</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="d-grid mb-2" style="grid-template-columns: repeat(7, 1fr); text-align:center;">
+          <small class="text-muted">Lu</small><small class="text-muted">Ma</small><small class="text-muted">Mi</small><small class="text-muted">Ju</small><small class="text-muted">Vi</small><small class="text-muted">Sa</small><small class="text-muted">Do</small>
+        </div>
+        <div id="cal-grid" class="d-grid" style="grid-template-columns: repeat(7, minmax(0, 1fr)); gap:6px;"></div>
+        <p id="cal-empty" class="text-sm text-muted mb-0 mt-2 d-none">No hay vencimientos próximos en este período.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header pb-2">
+        <h6 class="mb-0">Distribución por categoría</h6>
+        <p class="text-sm text-muted mb-0">Productos por categoría</p>
+      </div>
+      <div class="card-body">
+        <canvas id="categoryChart" height="220"></canvas>
+        <p class="text-sm text-muted mb-0 mt-2">Aún no hay datos para mostrar.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-header pb-2 d-flex justify-content-between align-items-center">
+        <div>
+          <h6 class="mb-0">Acciones prioritarias</h6>
+          <p class="text-sm text-muted mb-0">Riesgos y acciones sugeridas</p>
+        </div>
+      </div>
+      <div class="card-body px-0 pt-0 pb-2">
+        <div class="table-responsive">
+          <table class="table align-items-center mb-0">
+            <thead>
+              <tr>
+                <th class="text-secondary text-xxs font-weight-bolder opacity-7">Producto</th>
+                <th class="text-secondary text-xxs font-weight-bolder opacity-7">Ubicación</th>
+                <th class="text-secondary text-xxs font-weight-bolder opacity-7">Motivo</th>
+                <th class="text-secondary text-xxs font-weight-bolder opacity-7">Fecha</th>
+                <th class="text-secondary text-xxs font-weight-bolder opacity-7">Cantidad</th>
+                <th class="text-secondary text-xxs font-weight-bolder opacity-7 text-end">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in priority_actions %}
+              <tr>
+                <td>{{ item.producto }}</td>
+                <td>{{ item.ubicacion|default:"-" }}</td>
+                <td>
+                  {% if item.tipo == 'vencido' %}
+                    <span class="badge bg-danger">Vencido</span>
+                  {% elif item.tipo == 'vence_pronto' %}
+                    <span class="badge bg-warning text-dark">Vence pronto</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Stock bajo</span>
+                  {% endif %}
+                </td>
+                <td>{{ item.fecha|default:"-" }}</td>
+                <td>{{ item.cantidad }}</td>
+                <td class="text-end">
+                  {% if item.batch_id %}
+                    <a href="{% url 'inventory:batch_update' item.batch_id %}" class="btn btn-sm btn-outline-primary">Ver</a>
+                  {% elif item.product_id %}
+                    <a href="{% url 'inventory:product_update' item.product_id %}" class="btn btn-sm btn-outline-primary">Ver</a>
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="6" class="text-center text-muted py-3">No hay vencimientos próximos en este período.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header pb-2">
+        <h6 class="mb-0">Actividad reciente</h6>
+        <p class="text-sm text-muted mb-0">Últimos movimientos</p>
+      </div>
+      <div class="card-body px-0 pt-0 pb-2">
+        <div class="table-responsive">
+          <table class="table align-items-center mb-0">
+            <thead>
+              <tr>
+                <th class="text-secondary text-xxs font-weight-bolder opacity-7">Fecha</th>
+                <th class="text-secondary text-xxs font-weight-bolder opacity-7">Tipo</th>
+                <th class="text-secondary text-xxs font-weight-bolder opacity-7">Cantidad</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for mov in last_movements %}
+              <tr>
+                <td>{{ mov.created_at|date:"Y-m-d H:i" }}</td>
+                <td>{{ mov.get_movement_type_display }}</td>
+                <td>{{ mov.quantity }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="3" class="text-center text-muted py-3">Aún no hay movimientos registrados.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock inventory_content %}
+
+{% block extra_js %}
+  {{ block.super }}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <script>
+    (function() {
+      // --- Calendario de vencimientos ---
+      const series = {{ series_json|safe }};
+      const data90 = series["90"];
+      const dataMap = {};
+      data90.labels.forEach((lbl, idx) => { dataMap[lbl] = data90.data[idx] || 0; });
+
+      const grid = document.getElementById('cal-grid');
+      const title = document.getElementById('cal-title');
+      const emptyMsg = document.getElementById('cal-empty');
+      let current = new Date(data90.labels.length ? data90.labels[0] : Date.now());
+
+      function renderCalendar(baseDate) {
+        const year = baseDate.getFullYear();
+        const month = baseDate.getMonth();
+        title.textContent = baseDate.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+        grid.innerHTML = '';
+
+        const firstDay = new Date(year, month, 1);
+        const startWeekday = (firstDay.getDay() + 6) % 7; // lunes=0
+        for (let i=0; i<startWeekday; i++) {
+          const pad = document.createElement('div');
+          grid.appendChild(pad);
+        }
+
+        let hasData = false;
+        const daysInMonth = new Date(year, month+1, 0).getDate();
+        for (let d=1; d<=daysInMonth; d++) {
+          const dateStr = new Date(year, month, d).toISOString().slice(0,10);
+          const qty = dataMap[dateStr] || 0;
+          if (qty > 0) hasData = true;
+          const cell = document.createElement('div');
+          cell.className = "border rounded p-2 text-center";
+          cell.innerHTML = `<div class="text-xs text-muted mb-1">${d}</div><div class="fw-bold">${qty}</div>`;
+          grid.appendChild(cell);
+        }
+        emptyMsg.classList.toggle('d-none', hasData);
+      }
+
+      document.getElementById('cal-prev').addEventListener('click', () => {
+        current.setMonth(current.getMonth() - 1);
+        renderCalendar(current);
+      });
+      document.getElementById('cal-next').addEventListener('click', () => {
+        current.setMonth(current.getMonth() + 1);
+        renderCalendar(current);
+      });
+      renderCalendar(current);
+
+      // --- Doughnut categorías ---
+      const catLabels = {{ cat_dist_labels|safe }};
+      const catData = {{ cat_dist_data|safe }};
+      const catCtx = document.getElementById('categoryChart');
+      if (catCtx && catLabels.length && catData.some(v => v > 0)) {
+        new Chart(catCtx, {
+          type: 'doughnut',
+          data: {
+            labels: catLabels,
+            datasets: [{
+              data: catData,
+              backgroundColor: ['#5e72e4', '#2dce89', '#11cdef', '#f5365c', '#fb6340', '#ced4da'],
+              borderWidth: 1
+            }]
+          },
+          options: { plugins: { legend: { position: 'bottom' } } }
+        });
+        const msg = catCtx.parentElement.querySelector('p.text-sm');
+        if (msg) msg.style.display = 'none';
+      }
+    })();
+  </script>
+{% endblock extra_js %}

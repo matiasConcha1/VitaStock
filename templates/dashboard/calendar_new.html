@@ -3,10 +3,33 @@
 {% block page_title %}Panel de control{% endblock page_title %}
 
 {% block header_actions %}
+<style>
+  /* Evitar doble caret/cuadro en el botón */
+  #new-action-btn.dropdown-toggle::after { display: none; }
+  /* Dropdown styling to avoid overlay/gradient bleed */
+  .dropdown-menu {
+    background: #ffffff;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+    min-width: 220px;
+    padding: 6px 0;
+    z-index: 1050;
+  }
+  .dropdown-menu .dropdown-item {
+    padding: 10px 16px;
+    font-weight: 500;
+    color: #111827;
+  }
+  .dropdown-menu .dropdown-item:hover {
+    background: #f3f4f6;
+    color: #111827;
+  }
+</style>
 <div class="dropdown">
-  <button class="btn btn-primary dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-    <span>Nueva acción</span>
-    <span class="ms-1">▼</span>
+  <button id="new-action-btn" class="btn btn-primary dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <span class="fw-semibold">Nueva acción</span>
+    <span aria-hidden="true">▼</span>
   </button>
   <ul class="dropdown-menu">
     <li><a class="dropdown-item" href="{% url 'inventory:product_create' %}">Crear producto</a></li>
@@ -242,6 +265,51 @@
         const msg = catCtx.parentElement.querySelector('p.text-sm');
         if (msg) msg.style.display = 'none';
       }
+    })();
+
+    // Alertas con SweetAlert2 para vencimientos/stock
+    (function() {
+      const expired = Number({{ expired_count|default:0 }});
+      const soon7 = Number({{ soon7_count|default:0 }});
+      const lowStock = Number({{ low_stock_count|default:0 }});
+      const hasRisk = expired > 0 || soon7 > 0 || lowStock > 0;
+      if (!hasRisk || typeof Swal === 'undefined') return;
+
+      let title = 'Estado de inventario';
+      let icon = 'info';
+      let text = '';
+
+      if (expired > 0) {
+        title = 'Lotes vencidos';
+        icon = 'error';
+        text = `Tienes ${expired} lote(s) vencido(s). Revisa y decide qué hacer.`;
+      } else if (soon7 > 0) {
+        title = 'Vencen en 7 días';
+        icon = 'warning';
+        text = `Tienes ${soon7} lote(s) que vencen en los próximos 7 días.`;
+      } else if (lowStock > 0) {
+        title = 'Stock bajo';
+        icon = 'info';
+        text = `${lowStock} producto(s) están por debajo del stock mínimo.`;
+      }
+
+      Swal.fire({
+        title: title,
+        text: text,
+        icon: icon,
+        confirmButtonText: 'Ir al detalle',
+        showCancelButton: true,
+        cancelButtonText: 'Cerrar',
+        customClass: {popup: 'swal2-shadow'}
+      }).then(result => {
+        if (result.isConfirmed) {
+          if (expired > 0 || soon7 > 0) {
+            window.location.href = "{% url 'inventory:batch_list' %}";
+          } else if (lowStock > 0) {
+            window.location.href = "{% url 'inventory:product_list' %}";
+          }
+        }
+      });
     })();
   </script>
 {% endblock extra_js %}

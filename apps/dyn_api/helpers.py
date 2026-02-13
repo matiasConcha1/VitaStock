@@ -53,7 +53,7 @@ def check_permission(function):
                 return function(viewRequest, *args, **kwargs)
 
             # For authentication for guests
-            return HttpResponseRedirect('/login/')
+            return HttpResponseRedirect('/iniciar-sesion/')
 
         except Exception as e:
 

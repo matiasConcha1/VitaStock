@@ -2,7 +2,14 @@
 
 <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 " id="sidenav-main">
     <style>
-      /* Responsive adjustments for sidebar branding */
+      /* Sidebar sizing */
+      #sidenav-main {
+        width: 260px;
+        max-width: 260px;
+        overflow-y: auto;
+        max-height: calc(100vh - 24px);
+      }
+      /* Branding */
       #sidenav-main .brand-logo {
         height: 140px;
         width: auto;
@@ -12,29 +19,38 @@
       #sidenav-main .brand-title {
         font-size: 1.25rem;
       }
+      /* Tablet */
       @media (max-width: 991.98px) {
         #sidenav-main {
-          margin-left: 1rem;
-          margin-right: 1rem;
+          width: 230px;
+          max-width: 230px;
+          margin-left: 0.75rem;
+          margin-right: 0.75rem;
+          max-height: calc(100vh - 16px);
         }
         #sidenav-main .brand-logo {
-          height: 96px;
-          max-width: 140px;
+          height: 90px;
+          max-width: 130px;
         }
         #sidenav-main .brand-title {
           font-size: 1.05rem;
         }
       }
+      /* Mobile */
       @media (max-width: 575.98px) {
+        #sidenav-main {
+          width: 210px;
+          max-width: 210px;
+          margin: 0.5rem;
+          border-radius: 16px;
+          max-height: calc(100vh - 12px);
+        }
         #sidenav-main .brand-logo {
-          height: 72px;
-          max-width: 110px;
+          height: 68px;
+          max-width: 105px;
         }
         #sidenav-main .brand-title {
           font-size: 0.95rem;
-        }
-        #sidenav-main {
-          margin: 0.75rem;
         }
       }
     </style>

@@ -5,6 +5,9 @@ from . import views
 app_name = "inventory"
 
 urlpatterns = [
+    # Accounts (admin/staff)
+    path("accounts/", views.AccountListView.as_view(), name="account_list"),
+    path("accounts/<int:pk>/toggle/", views.AccountToggleView.as_view(), name="account_toggle"),
     # Categories
     path("categories/", views.CategoryListView.as_view(), name="category_list"),
     path("categories/create/", views.CategoryCreateView.as_view(), name="category_create"),
@@ -20,6 +23,9 @@ urlpatterns = [
     path("products/create/", views.ProductCreateView.as_view(), name="product_create"),
     path("products/<int:pk>/edit/", views.ProductUpdateView.as_view(), name="product_update"),
     path("products/<int:pk>/delete/", views.ProductDeleteView.as_view(), name="product_delete"),
+    path("products/<int:pk>/image/", views.ProductImageView.as_view(), name="product_image"),
+    # Dashboard
+    path("dashboard/", views.DashboardView.as_view(), name="dashboard"),
     # Batches
     path("batches/", views.BatchListView.as_view(), name="batch_list"),
     path("batches/create/", views.BatchCreateView.as_view(), name="batch_create"),

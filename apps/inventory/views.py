@@ -1,17 +1,36 @@
 ﻿from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.messages.views import SuccessMessageMixin
+import json
+
 from django.db.models import Sum
 from django.db.models.functions import Coalesce
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, ListView, UpdateView, TemplateView, View
+from django.core.serializers.json import DjangoJSONEncoder
+from django.http import FileResponse, Http404
+from django.contrib.auth import get_user_model
+import mimetypes
+
+User = get_user_model()
+import os
 
 from .filters import filter_by_query
 from .forms import BatchForm, CategoryForm, LocationForm, MovementForm, ProductForm
 from .models import Batch, Category, Location, Movement, Product
+from .services import (
+    get_category_distribution,
+    get_dashboard_data,
+    get_expiry_timeseries,
+    get_expiry_calendar,
+    get_kpis,
+    get_priority_actions,
+    get_recent_movements,
+)
 
 
-class InventoryBaseMixin:
+class InventoryBaseMixin(LoginRequiredMixin):
     segment = ""
     page_title = ""
 
@@ -146,6 +165,20 @@ class ProductListView(InventoryBaseMixin, ListView):
             context = self.get_context_data(location_form=form)
             return self.render_to_response(context)
         return redirect("inventory:product_list")
+
+
+class ProductImageView(LoginRequiredMixin, View):
+    """Sirve la imagen del producto aun si el servidor de media falla."""
+
+    def get(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        if not product.image:
+            raise Http404("Imagen no disponible")
+        path = product.image.path
+        if not os.path.exists(path):
+            raise Http404("Archivo no encontrado")
+        ctype, _ = mimetypes.guess_type(path)
+        return FileResponse(open(path, "rb"), content_type=ctype or "application/octet-stream")
 
 
 class ProductCreateView(InventoryBaseMixin, SuccessMessageMixin, CreateView):
@@ -286,3 +319,94 @@ class MovementDeleteView(InventoryBaseMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(request, "Movimiento eliminado con éxito.")
         return super().delete(request, *args, **kwargs)
+
+
+class DashboardView(InventoryBaseMixin, TemplateView):
+    template_name = "dashboard/calendar_new.html"
+    segment = "dashboard"
+    page_title = "Panel de control"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # KPIs
+        kpis = get_kpis()
+        context.update(
+            {
+                "expired_count": kpis["lotes_vencidos"],
+                "soon7_count": kpis["vencen_7"],
+                "soon30_count": kpis["vencen_30"],
+                "low_stock_count": kpis["stock_bajo"],
+                "kpi_items": [
+                    {"title": "Lotes vencidos", "value": kpis["lotes_vencidos"], "note": "Últimos 30 días"},
+                    {"title": "Vence en 7 días", "value": kpis["vencen_7"], "note": "Actualizado hoy"},
+                    {"title": "Vence en 30 días", "value": kpis["vencen_30"], "note": "Actualizado hoy"},
+                    {"title": "Stock bajo", "value": kpis["stock_bajo"], "note": "Actualizado hoy"},
+                ],
+            }
+        )
+
+        # series para 7/30/90
+        context["series_7"] = get_expiry_timeseries(7)
+        context["series_30"] = get_expiry_timeseries(30)
+        context["series_90"] = get_expiry_timeseries(90)
+        context["calendar_days"] = list(zip(context["series_30"]["labels"], context["series_30"]["data"]))
+        calendar_map = get_expiry_calendar(365)
+        context["calendar_data"] = calendar_map
+        # serialización para Chart.js
+        context["series_json"] = json.dumps(
+            {
+                "7": context["series_7"],
+                "30": context["series_30"],
+                "90": context["series_90"],
+            },
+            cls=DjangoJSONEncoder,
+        )
+        context["calendar_data_json"] = json.dumps(calendar_map, cls=DjangoJSONEncoder)
+
+        # distribución por categoría
+        cat_dist = get_category_distribution()
+        context["cat_dist_labels"] = json.dumps(cat_dist["labels"], cls=DjangoJSONEncoder)
+        context["cat_dist_data"] = json.dumps(cat_dist["data"], cls=DjangoJSONEncoder)
+
+        # acciones prioritarias
+        context["priority_actions"] = get_priority_actions()
+
+        # movimientos recientes
+        context["last_movements"] = get_recent_movements()
+
+        # apoyo para barras de categoría
+        context["category_summary"] = get_dashboard_data().get("category_summary")
+        context["max_cat_total"] = get_dashboard_data().get("max_cat_total")
+        return context
+
+
+class StaffRequiredMixin(UserPassesTestMixin):
+    """Solo staff o superusuarios."""
+
+    def test_func(self):
+        return self.request.user.is_staff or self.request.user.is_superuser
+
+
+class AccountListView(StaffRequiredMixin, InventoryBaseMixin, ListView):
+    model = User
+    template_name = "inventory/accounts/list.html"
+    context_object_name = "users"
+    segment = "admin_accounts"
+    page_title = "Cuentas"
+
+    def get_queryset(self):
+        return User.objects.order_by("-is_active", "username")
+
+
+class AccountToggleView(StaffRequiredMixin, InventoryBaseMixin, View):
+    def post(self, request, pk):
+        if request.user.pk == pk:
+            messages.warning(request, "No puedes desactivar tu propia cuenta.")
+            return redirect("inventory:account_list")
+        user = get_object_or_404(User, pk=pk)
+        user.is_active = not user.is_active
+        user.save()
+        estado = "activada" if user.is_active else "desactivada"
+        messages.success(request, f"Cuenta {user.username} {estado}.")
+        return redirect("inventory:account_list")
+

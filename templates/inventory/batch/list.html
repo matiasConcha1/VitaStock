@@ -1,9 +1,9 @@
-{% extends "inventory/base_inventory.html" %}
+﻿{% extends "inventory/base_inventory.html" %}
 
 {% block page_title %}Lotes y vencimientos{% endblock page_title %}
 
 {% block header_actions %}
-<a href="{% url 'inventory:batch_create' %}" class="btn btn-primary">Create</a>
+<a href="{% url 'inventory:batch_create' %}" class="btn btn-primary">Crear lote</a>
 {% endblock header_actions %}
 
 {% block inventory_content %}
@@ -11,11 +11,11 @@
   <div class="card-body">
     <form method="get" class="row g-2 mb-3">
       <div class="col-sm-6 col-md-4">
-        <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search batches...">
+        <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Buscar lotes...">
       </div>
       <div class="col-auto">
-        <button class="btn btn-outline-primary" type="submit">Search</button>
-        <a href="{% url 'inventory:batch_list' %}" class="btn btn-outline-secondary">Clear</a>
+        <button class="btn btn-outline-primary" type="submit">Buscar</button>
+        <a href="{% url 'inventory:batch_list' %}" class="btn btn-outline-secondary">Limpiar</a>
       </div>
     </form>
 
@@ -42,20 +42,20 @@
               <td>{{ batch.location }}</td>
               <td>
                 {% if batch.is_expired %}
-                  <span class="badge bg-danger">Expired</span>
+                  <span class="badge bg-danger">Vencido</span>
                 {% elif batch.expires_soon %}
-                  <span class="badge bg-warning text-dark">Expiring &le; 7d</span>
+                  <span class="badge bg-warning text-dark">Vence ≤ 7 días</span>
                 {% else %}
                   <span class="badge bg-success">OK</span>
                 {% endif %}
               </td>
               <td class="text-end">
-                <a href="{% url 'inventory:batch_update' batch.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
-                <a href="{% url 'inventory:batch_delete' batch.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                <a href="{% url 'inventory:batch_update' batch.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                <a href="{% url 'inventory:batch_delete' batch.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
               </td>
             </tr>
           {% empty %}
-            <tr><td colspan="7" class="text-center text-muted">No batches yet.</td></tr>
+            <tr><td colspan="7" class="text-center text-muted">Aún no hay lotes.</td></tr>
           {% endfor %}
         </tbody>
       </table>

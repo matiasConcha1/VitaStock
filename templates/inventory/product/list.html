@@ -1,4 +1,5 @@
 {% extends "inventory/base_inventory.html" %}
+{% load static %}
 
 {% block page_title %}Productos{% endblock page_title %}
 
@@ -60,8 +61,11 @@
             <tr>
               <td class="text-center">
                 {% if product.image %}
-                  <a href="{{ product.image.url }}" target="_blank">
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width:48px; height:48px; object-fit:cover; border-radius:10px;">
+                  <a href="{% url 'inventory:product_image' product.pk %}" target="_blank">
+                    <img src="{% url 'inventory:product_image' product.pk %}"
+                         alt="{{ product.name }}"
+                         style="width:48px; height:48px; object-fit:cover; border-radius:10px;"
+                         onerror="this.onerror=null; this.src='{% static 'assets/img/logo1.png' %}';">
                   </a>
                 {% else %}
                   <div class="bg-light border rounded d-flex align-items-center justify-content-center" style="width:48px; height:48px;">

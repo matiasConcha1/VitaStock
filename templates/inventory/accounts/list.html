@@ -1,0 +1,61 @@
+{% extends "inventory/base_inventory.html" %}
+{% load static %}
+
+{% block page_title %}Cuentas{% endblock page_title %}
+
+{% block inventory_content %}
+<div class="card">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h5 class="mb-0">Administrar usuarios</h5>
+        <small class="text-muted">Activa o desactiva el acceso a VitaStock.</small>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table align-items-center">
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th class="text-end">Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td class="text-sm">{{ u.username }}</td>
+            <td class="text-sm">{{ u.email|default:"—" }}</td>
+            <td class="text-sm">
+              {% if u.is_superuser %}<span class="badge bg-gradient-dark">Superuser</span>
+              {% elif u.is_staff %}<span class="badge bg-gradient-info">Staff</span>
+              {% else %}<span class="badge bg-secondary">Usuario</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if u.is_active %}
+                <span class="badge bg-success">Activo</span>
+              {% else %}
+                <span class="badge bg-danger">Inactivo</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <form method="post" action="{% url 'inventory:account_toggle' u.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm {% if u.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+                  {% if u.is_active %}Desactivar{% else %}Activar{% endif %}
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="text-center text-muted py-4">No hay usuarios.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock inventory_content %}

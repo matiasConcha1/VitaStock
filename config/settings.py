@@ -30,8 +30,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'Super_Secr3t_9999')
 
-# Enable/Disable DEBUG Mode
-DEBUG = str2bool(os.environ.get('DEBUG'))
+# Enable/Disable DEBUG Mode (for local dev: True)
+DEBUG = True
 #print(' DEBUG -> ' + str(DEBUG) ) 
 
 ALLOWED_HOSTS = ['*']
@@ -161,7 +161,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "es-es"
 
 TIME_ZONE = "UTC"
 
@@ -191,7 +191,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/iniciar-sesion/'
+LOGIN_REDIRECT_URL = '/panel/'
+LOGOUT_REDIRECT_URL = '/iniciar-sesion/'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # ### DYNAMIC_DATATB Settings ###

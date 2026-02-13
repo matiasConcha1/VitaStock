@@ -17,8 +17,18 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.urls import re_path
+from django.views.static import serve
+from django.contrib.auth import views as auth_views
+
+from apps.pages.views import VitaStockLoginView, VitaStockRegisterView
+from apps.inventory.views import DashboardView
 
 urlpatterns = [
+    path("iniciar-sesion/", VitaStockLoginView.as_view(), name="login"),
+    path("registrarse/", VitaStockRegisterView.as_view(), name="register"),
+    path("cerrar-sesion/", auth_views.LogoutView.as_view(), name="logout"),
+    path("panel/", DashboardView.as_view(), name="panel"),
     path('', include('apps.pages.urls')),
     path('', include('apps.dyn_dt.urls')),
     path('', include('apps.dyn_api.urls')),
@@ -28,5 +38,8 @@ urlpatterns = [
     path("", include('admin_soft.urls'))
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Servir media (incluso si DEBUG=False en local)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns.append(
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT})
+)

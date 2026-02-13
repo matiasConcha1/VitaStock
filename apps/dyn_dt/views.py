@@ -19,6 +19,7 @@ from cli import *
 
 # Create your views here.
 
+@login_required
 def index(request):
     
     context = {
@@ -28,6 +29,7 @@ def index(request):
 
     return render(request, 'dyn_dt/index.html', context)
 
+@login_required
 def create_filter(request, model_name):
     model_name = model_name.lower()
     if request.method == "POST":
@@ -46,6 +48,7 @@ def create_filter(request, model_name):
         return redirect(reverse('model_dt', args=[model_name]))
 
 
+@login_required
 def create_page_items(request, model_name):
     model_name = model_name.lower()
     if request.method == 'POST':
@@ -57,6 +60,7 @@ def create_page_items(request, model_name):
         return redirect(reverse('model_dt', args=[model_name]))
 
 
+@login_required
 def create_hide_show_filter(request, model_name):
     model_name = model_name.lower()
     if request.method == "POST":
@@ -75,6 +79,7 @@ def create_hide_show_filter(request, model_name):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
+@login_required
 def delete_filter(request, model_name, id):
     model_name = model_name.lower()
     filter_instance = ModelFilter.objects.get(id=id, parent=model_name)
@@ -89,6 +94,7 @@ def get_model_field_names(model, field_type):
         if isinstance(field, field_type)
     ]
 
+@login_required
 def model_dt(request, aPath):
     aModelName  = None
     aModelClass = None
@@ -184,7 +190,7 @@ def model_dt(request, aPath):
     return render(request, 'dyn_dt/model.html', context)
 
 
-@login_required(login_url='/accounts/login/')
+@login_required
 def create(request, aPath):
     aModelClass = None
 
@@ -214,7 +220,7 @@ def create(request, aPath):
     return redirect(request.META.get('HTTP_REFERER'))
 
 
-@login_required(login_url='/accounts/login/')
+@login_required
 def delete(request, aPath, id):
     aModelClass = None
 
@@ -230,7 +236,7 @@ def delete(request, aPath, id):
     return redirect(request.META.get('HTTP_REFERER'))
 
 
-@login_required(login_url='/accounts/login/')
+@login_required
 def update(request, aPath, id):
     aModelClass = None
 
